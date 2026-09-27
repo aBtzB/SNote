@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "snote-notebook"
+version = "0.2.0"
+description = "A local audio notebook with editable transcripts and translations."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+license = {text = "MIT"}
+dependencies = []
+
+[project.optional-dependencies]
+audio = ["faster-whisper==1.2.1", "sentencepiece>=0.2,<0.3"]
+
+[project.scripts]
+snote = "snote.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["snote*"]
+
+[tool.setuptools.package-data]
+snote = ["static/*"]

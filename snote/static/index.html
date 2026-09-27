@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#25332f">
+  <title>SNote · Your audio notebook</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to workspace</a>
+  <aside class="sidebar">
+    <button class="brand" id="home" aria-label="SNote home"><img src="/favicon.svg" width="33" height="33" alt=""><span>SNote<span class="brand-dot">.</span></span></button>
+    <div class="sidebar-caption">A little closer to every word.</div>
+    <button class="new-button" data-open="import-dialog"><span aria-hidden="true">＋</span> New recording</button>
+    <div class="section-label">YOUR NOTEBOOK <span id="project-count">0</span></div>
+    <nav id="project-list" aria-label="Recordings"><p class="sidebar-empty">Your recordings will live here.</p></nav>
+    <div class="sidebar-bottom">
+      <div class="local-label"><span class="status-dot"></span> On your computer</div>
+      <p>Audio, notes, and a bit of quiet.</p>
+      <button class="setup-link" data-open="setup-dialog">Models <span aria-hidden="true">↗</span></button>
+    </div>
+  </aside>
+
+  <main id="main" tabindex="-1">
+    <header class="topbar"><span>THE AUDIO NOTEBOOK</span><span class="topbar-right">Listen. Make sense. Keep the words.</span></header>
+    <section id="welcome" class="welcome">
+      <div class="eyebrow"><span class="small-line"></span> FROM SOUND TO SOMETHING USEFUL</div>
+      <h1>Your recordings.<br><em>In your own words.</em></h1>
+      <p class="intro">Turn an interview, a lecture, or a passing thought into text.<br class="desktop-only"> Listen back, tidy up the details, and carry it into another language.</p>
+      <div id="first-run-notice" class="notice" hidden><span>Start by choosing a speech model. Tiny is a small first download.</span><button class="secondary" data-open="setup-dialog">Choose models</button></div>
+      <button id="drop-zone" class="drop-zone" data-open="import-dialog">
+        <span class="upload-mark" aria-hidden="true">↑</span>
+        <strong>Drop an audio file here</strong>
+        <span>or choose one from your computer</span>
+        <small>MP3, WAV, M4A, FLAC & more · up to 100 MB / 30 minutes</small>
+      </button>
+      <button id="try-sample" class="sample-link">Just looking around? Open a sample workspace <span aria-hidden="true">↗</span></button>
+      <div class="welcome-steps">
+        <article><span>01 / LISTEN</span><h2>Catch the words.</h2><p>A local speech model turns audio into timestamped lines.</p></article>
+        <article><span>02 / MAKE IT YOURS</span><h2>Keep the meaning.</h2><p>Correct the transcript and compare the translation beside it.</p></article>
+        <article><span>03 / TAKE IT WITH YOU</span><h2>Put it to work.</h2><p>Export readable notes, subtitles, or the full transcript data.</p></article>
+      </div>
+      <footer class="welcome-footer">No account. No subscription. Models download once during setup.</footer>
+    </section>
+
+    <section id="workspace" class="workspace" hidden>
+      <div class="recording-heading">
+        <div class="heading-left"><div class="eyebrow" id="recording-kicker">RECORDING</div>
+          <label class="sr-only" for="project-title">Recording title</label>
+          <input id="project-title" class="title-input" maxlength="120" aria-label="Recording title">
+          <div id="recording-meta" class="recording-meta"></div>
+        </div>
+        <button id="delete-project" class="text-button danger">Delete recording</button>
+      </div>
+      <div id="sample-note" class="sample-note" hidden>Sample workspace · These lines and translations are illustrative. There is no attached audio.</div>
+      <div id="job-notice" class="notice" hidden><div><strong id="job-title"></strong><p id="job-message"></p><progress id="job-progress" max="100" value="0"></progress></div><button id="cancel-job" class="secondary">Stop</button><button id="retry-job" class="secondary" hidden>Try again</button></div>
+      <div id="warning" class="notice warning" role="status" hidden></div>
+
+      <section class="audio-card" aria-label="Audio playback">
+        <div class="audio-top"><span class="section-label light-label">THE RECORDING</span><span id="audio-duration" class="mono">00:00</span></div>
+        <canvas id="waveform" width="1100" height="70" aria-label="Audio amplitude overview"></canvas>
+        <audio id="audio" controls preload="metadata" aria-label="Recording audio"></audio>
+        <div id="no-audio" class="no-audio">Add your own recording to listen along with the transcript.</div>
+      </section>
+
+      <div class="transcript-toolbar">
+        <div><h2>The transcript <span id="line-count"></span></h2><p id="review-count">No lines reviewed yet</p></div>
+        <div class="toolbar-actions"><label class="search-field"><span aria-hidden="true">⌕</span><input type="search" id="search" placeholder="Find a word…" aria-label="Search transcript"></label><button id="filter-review" class="secondary" aria-pressed="false">Needs review</button></div>
+      </div>
+      <div class="translation-controls"><p>Make corrections below. Changes save when you choose <strong>Save changes</strong>.</p><div><label for="retranslate-target">Translate to</label><select id="retranslate-target" aria-label="Translation language"></select><button id="retranslate" class="text-button">Translate <span aria-hidden="true">↗</span></button></div></div>
+      <div class="transcript-head"><span>TIME</span><span id="source-heading">ORIGINAL</span><span id="translation-heading">TRANSLATION</span><span class="review-heading" title="Mark a line reviewed">DONE</span></div>
+      <div id="segments" class="segments"></div>
+      <div id="no-segments" class="no-segments" hidden>No lines match your search.</div>
+      <div class="editor-footer"><span>Click a timestamp to listen from that line. Correcting source text clears an unchanged translation.</span><span class="mono">⌘ / Ctrl + S to save</span></div>
+      <div class="save-bar"><div class="save-state"><span id="save-dot" class="status-dot"></span><span id="save-state" role="status">All changes saved</span></div><div class="save-actions"><button id="discard" class="text-button" hidden>Discard edits</button><button id="save" class="primary" disabled>Save changes</button><button id="export-open" class="secondary">Export <span aria-hidden="true">↓</span></button></div></div>
+    </section>
+  </main>
+
+  <dialog id="import-dialog" aria-labelledby="import-title">
+    <form id="import-form">
+      <div class="dialog-top"><span class="eyebrow">A FRESH PAGE</span><button type="button" class="icon-button" data-close aria-label="Close dialog">×</button></div>
+      <h2 id="import-title">Bring something to listen to.</h2><p class="dialog-intro">Your file stays on this computer. Start with a short, clear recording.</p>
+      <label class="file-picker" for="audio-file"><span aria-hidden="true">＋</span><strong id="file-label">Choose an audio file</strong><small>Up to 100 MB · 30 minutes</small></label>
+      <input id="audio-file" type="file" accept=".wav,.mp3,.m4a,.flac,.ogg,.opus,.webm,.aac" required>
+      <div class="field-grid"><label>Spoken language<select id="source-language"></select></label><label>Translate into<select id="target-language"></select></label></div>
+      <label class="form-label">Speech model<select id="model"></select></label>
+      <p class="field-help">Choose a spoken language if detection struggles. Translation needs the matching language packs from Models.</p>
+      <div id="dependency-note" class="notice warning" hidden><span id="dependency-message">Install a speech model to begin.</span> <button type="button" data-open="setup-dialog" class="text-button">Open Models</button></div>
+      <p id="upload-status" role="status"></p>
+      <div class="dialog-actions"><button type="button" class="secondary" data-close>Cancel</button><button id="upload-submit" type="submit" class="primary">Create transcript <span aria-hidden="true">↗</span></button></div>
+    </form>
+  </dialog>
+
+  <dialog id="export-dialog" aria-labelledby="export-title">
+    <div class="dialog-top"><span class="eyebrow">READY FOR WHAT'S NEXT</span><button class="icon-button" data-close aria-label="Close dialog">×</button></div>
+    <h2 id="export-title">Take the words with you.</h2><p class="dialog-intro">Export includes all saved lines, including any you haven't reviewed. JSON includes both languages and review status.</p>
+    <div class="field-grid"><label>Format<select id="export-format"><option value="txt">Plain text (.txt)</option><option value="srt">SubRip subtitles (.srt)</option><option value="vtt">WebVTT subtitles (.vtt)</option><option value="json">Full transcript data (.json)</option></select></label><label>Include<select id="export-content"><option value="original">Original transcript</option><option value="translation">Translation</option><option value="both">Both languages</option></select></label></div>
+    <p id="export-note" class="field-help"></p><div class="dialog-actions"><button class="secondary" data-close>Cancel</button><button id="download" class="primary">Download file ↓</button></div>
+  </dialog>
+
+  <dialog id="setup-dialog" class="setup-dialog model-manager" aria-labelledby="setup-title">
+    <div class="dialog-top"><span class="eyebrow">YOUR LOCAL TOOLKIT</span><button class="icon-button" data-close aria-label="Close model manager">×</button></div>
+    <h2 id="setup-title">Choose what you need.</h2>
+    <p class="dialog-intro">Download a speech model and any translation pairs you want. Nothing downloads until you choose it. Once installed, models work offline.</p>
+    <div id="model-dependencies" class="notice warning" hidden><div><strong>Install the audio dependencies first</strong><p>Run this from the project folder using the same Python environment, then restart SNote.</p><pre><code>python -m pip install -r requirements.txt</code></pre></div></div>
+    <div class="model-tabs" role="group" aria-label="Model type"><button id="speech-tab" class="secondary" aria-pressed="true">Speech recognition</button><button id="translation-tab" class="secondary" aria-pressed="false">Translation</button></div>
+    <section id="speech-model-panel" aria-label="Speech models">
+      <p class="field-help">Tiny is the lightest option (about 78 MB). Larger models use more disk space and memory, and may run slowly on a CPU. Download size is shown during transfer.</p>
+      <div id="speech-model-list" class="model-list"></div>
+    </section>
+    <section id="translation-model-panel" aria-label="Translation models" hidden>
+      <div class="catalog-toolbar"><label class="search-field"><span aria-hidden="true">⌕</span><input id="model-search" type="search" placeholder="English, Arabic, Spanish…" aria-label="Find translation models"></label><button id="refresh-catalog" class="secondary">Load language list</button></div>
+      <p class="field-help">Language pairs are directional. English → Spanish and Spanish → English are separate downloads. The list comes from the official Argos index and shows languages this notebook supports. Packs are checked for compatibility during installation.</p>
+      <p id="installed-pairs" class="installed-pairs"></p>
+      <div id="translation-model-list" class="model-list"></div>
+    </section>
+    <section id="model-job" class="model-job" aria-label="Model download progress" hidden>
+      <div class="model-job-heading"><strong id="model-job-label"></strong><span id="model-job-size" class="mono"></span></div>
+      <progress id="model-progress" max="100" aria-label="Download progress"></progress>
+      <p id="model-job-message" role="status"></p>
+      <div class="model-job-actions"><button id="cancel-model" class="secondary">Cancel download</button><button id="retry-model" class="secondary" hidden>Try again</button></div>
+    </section>
+    <div id="setup-status" class="setup-status"></div>
+    <p class="field-help">You can close this panel while downloading. Keep the SNote terminal running. Installed models are available immediately.</p>
+  </dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <noscript><div class="noscript">SNote needs JavaScript enabled for its transcript editor.</div></noscript>
+</body>
+</html>

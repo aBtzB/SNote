@@ -1,0 +1,4 @@
+# The notebook and its sample run with the Python standard library.
+# These packages are needed to process real audio and run local translation.
+faster-whisper==1.2.1
+sentencepiece>=0.2,<0.3
